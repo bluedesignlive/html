@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EPUB Reader</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background-color: #f5f5f5;
+            padding: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+
+        #page-info {
+            float: right;
+            margin-right: 20px;
+        }
+
+        #content {
+            margin-top: 60px;
+            height: calc(100vh - 60px);
+            overflow-y: auto;
+        }
+
+        #viewer {
+            width: 80%;
+            margin: 0 auto;
+            padding: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="header">
+        <span>EPUB Reader</span>
+        <div id="page-info">Page: <span id="current-page">0</span></div>
+    </div>
+    <div id="content">
+        <div id="viewer"></div>
+    </div>
+
+    <!-- Include epub.js library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/epub.js/0.3.93/epub.min.js"></script>
+    
+    <script>
+        // Initialize the EPUB reader
+        const book = ePub("path/to/your/book.epub");
+        const rendition = book.renderTo("viewer", {
+            width: "100%",
+            height: "100%",
+            spread: "none"
+        });
+
+        // Display the book
+        rendition.display();
+
+        // Update page numbers during navigation
+        rendition.on("relocated", function(location) {
+            const currentPage = Math.floor(location.start.percentage * 100);
+            document.getElementById("current-page").textContent = currentPage;
+        });
+
+        // Handle window resize
+        window.addEventListener("resize", () => {
+            rendition.resize();
+        });
+
+        // Enable keyboard navigation
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "ArrowLeft") {
+                book.package.metadata.direction === "rtl" ? rendition.next() : rendition.prev();
+            } else if (e.key === "ArrowRight") {
+                book.package.metadata.direction === "rtl" ? rendition.prev() : rendition.next();
+            }
+        });
+    </script>
+</body>
+</html>
